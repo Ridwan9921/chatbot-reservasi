@@ -1,0 +1,29 @@
+# Groq AI
+GROQ_API_KEY=gsk_xxxxxxxxxxxxxxxxxxxxxx
+
+# Supabase Database
+SUPABASE_URL=https://xxxxx.supabase.co
+SUPABASE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ey...
+
+# Server
+PORT=3000
+```
+
+3. **GANTI** nilai-nilai `xxx` dengan credentials dari notepad kamu! ⚠️
+4. Save file: `Ctrl + S`, beri nama: `.env` (dengan titik di depan!)
+5. Pilih lokasi save: folder `chatbot-reservasi`
+
+---
+
+#### **File 2: `.gitignore`**
+
+File ini supaya file sensitif gak ke-upload ke GitHub.
+
+1. Buat file baru: `Ctrl + N`
+2. **COPY & PASTE** ini:
+```
+node_modules
+.env
+.vercel
+*.log
+.DS_Store
