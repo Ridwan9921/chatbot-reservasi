@@ -217,7 +217,7 @@
 
     <script>
         // GANTI INI dengan URL backend Anda setelah deploy!
-        const API_URL = 'http://localhost:3000';
+        const API_URL = 'https://chatbot-reservasi.vercel.app';
         
         // Generate session ID unik
         const SESSION_ID = 'session_' + Date.now();
@@ -275,8 +275,8 @@
                 
                 showTyping(false);
                 
-                if (data.success) {
-                    addMessage(data.message);
+                if (data.reply) {
+                    addMessage(data.reply);
                 } else {
                     addMessage('Maaf, terjadi kesalahan. Silakan coba lagi.');
                 }
