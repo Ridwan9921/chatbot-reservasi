@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Reservasi - Restoran WAJIB</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 700px;
+            max-height: 90vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.95;
+            font-weight: 400;
+        }
+
+        .status-bar {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #4ade80;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .chat-box {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            scroll-behavior: smooth;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.bot {
+            justify-content: flex-start;
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .message.bot .message-avatar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin-right: 12px;
+        }
+
+        .message.user .message-avatar {
+            background: #e5e7eb;
+            margin-left: 12px;
+            order: 2;
+        }
+
+        .message-content {
+            max-width: 75%;
+            padding: 14px 18px;
+            border-radius: 18px;
+            word-wrap: break-word;
+            line-height: 1.5;
+            font-size: 14.5px;
+        }
+
+        .message.bot .message-content {
+            background: white;
+            color: #1f2937;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 2px 8px rgba(102,126,234,0.4);
+        }
+
+        .message-time {
+            font-size: 11px;
+            opacity: 0.6;
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 18px;
+            width: fit-content;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .typing-indicator.show {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .typing-indicator span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #667eea;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.7;
+            }
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+
+        .input-area {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 14px 18px;
+            border: 2px solid #e5e7eb;
+            border-radius: 25px;
+            font-size: 14.5px;
+            outline: none;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .input-area input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+        }
+
+        .input-area input::placeholder {
+            color: #9ca3af;
+        }
+
+        .input-area button {
+            padding: 14px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14.5px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(102,126,234,0.4);
+        }
+
+        .input-area button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102,126,234,0.5);
+        }
+
+        .input-area button:active {
+            transform: translateY(0);
+        }
+
+        .input-area button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .chat-box::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-box::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .chat-box::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 3px;
+        }
+
+        .chat-box::-webkit-scrollbar-thumb:hover {
+            background: #764ba2;
+        }
+
+        .reservation-code {
+            background: #fef3c7;
+            border: 2px solid #fbbf24;
+            padding: 12px;
+            border-radius: 12px;
+            margin-top: 8px;
+            font-weight: 600;
+            color: #92400e;
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 0;
+            }
+            
+            .container {
+                border-radius: 0;
+                height: 100vh;
+                max-height: 100vh;
+            }
+            
+            .message-content {
+                max-width: 85%;
+            }
+        }
+
+        .error-message {
+            background: #fee2e2;
+            border: 2px solid #ef4444;
+            color: #991b1b;
+            padding: 12px;
+            border-radius: 12px;
+            margin-top: 8px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍽️ Restoran WAJIB</h1>
+            <p>Chatbot Reservasi Meja</p>
+            <div class="status-bar">
+                <div class="status-dot"></div>
+                <span>Online & Siap Melayani</span>
+            </div>
+        </div>
+
+        <div class="chat-box" id="chatBox">
+            <div class="message bot">
+                <div class="message-avatar">🤖</div>
+                <div>
+                    <div class="message-content">
+                        Selamat datang di Restoran WAJIB! 👋<br><br>
+                        Saya siap membantu Anda membuat reservasi meja.<br><br>
+                        Untuk memulai, kapan Anda ingin melakukan reservasi? Silakan sebutkan tanggal dan harinya.
+                    </div>
+                    <div class="message-time" id="firstMessageTime"></div>
+                </div>
+            </div>
+            
+            <div class="message bot" style="align-items: center;">
+                <div class="typing-indicator" id="typing">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-area">
+            <input 
+                type="text" 
+                id="userInput" 
+                placeholder="Ketik pesan Anda di sini..." 
+                onkeypress="handleKeyPress(event)"
+                autocomplete="off"
+            >
+            <button onclick="sendMessage()" id="sendBtn">Kirim</button>
+        </div>
+    </div>
+
+    <script>
+        // GANTI URL ini setelah deploy backend!
+        // Untuk testing lokal, gunakan:
+        const API_URL = 'http://localhost:3000';
+        
+        // Setelah deploy ke Vercel, ganti jadi:
+        // const API_URL = 'https://your-backend-url.vercel.app';
+        
+        // Generate unique session ID
+        const SESSION_ID = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        
+        // Set initial message time
+        document.getElementById('firstMessageTime').textContent = new Date().toLocaleTimeString('id-ID', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
+        // Function to format time
+        function getTimeString() {
+            return new Date().toLocaleTimeString('id-ID', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Function to add message to chat
+        function addMessage(content, isUser = false, showTime = true) {
+            const chatBox = document.getElementById('chatBox');
+            const typingIndicator = document.getElementById('typing').parentElement;
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = isUser ? '👤' : '🤖';
+            
+            const contentWrapper = document.createElement('div');
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            
+            // Check for reservation code in content
+            if (content.includes('Kode Reservasi')) {
+                const parts = content.split('Kode Reservasi Anda:');
+                if (parts.length > 1) {
+                    const [beforeCode, afterCode] = parts;
+                    const codeMatch = afterCode.match(/([A-Z0-9]+)/);
+                    if (codeMatch) {
+                        const code = codeMatch[1];
+                        const restOfMessage = afterCode.replace(code, '').trim();
+                        
+                        contentDiv.innerHTML = beforeCode.replace(/\n/g, '<br>');
+                        
+                        const codeDiv = document.createElement('div');
+                        codeDiv.className = 'reservation-code';
+                        codeDiv.textContent = '🎫 Kode: ' + code;
+                        contentDiv.appendChild(codeDiv);
+                        
+                        if (restOfMessage) {
+                            const restDiv = document.createElement('div');
+                            restDiv.innerHTML = '<br>' + restOfMessage.replace(/\n/g, '<br>');
+                            contentDiv.appendChild(restDiv);
+                        }
+                    } else {
+                        contentDiv.innerHTML = content.replace(/\n/g, '<br>');
+                    }
+                } else {
+                    contentDiv.innerHTML = content.replace(/\n/g, '<br>');
+                }
+            } else {
+                contentDiv.innerHTML = content.replace(/\n/g, '<br>');
+            }
+            
+            contentWrapper.appendChild(contentDiv);
+            
+            if (showTime) {
+                const timeDiv = document.createElement('div');
+                timeDiv.className = 'message-time';
+                timeDiv.textContent = getTimeString();
+                contentWrapper.appendChild(timeDiv);
+            }
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(contentWrapper);
+            
+            chatBox.insertBefore(messageDiv, typingIndicator);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // Function to show/hide typing indicator
+        function showTyping(show) {
+            const typing = document.getElementById('typing');
+            const chatBox = document.getElementById('chatBox');
+            
+            if (show) {
+                typing.classList.add('show');
+            } else {
+                typing.classList.remove('show');
+            }
+            
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // Function to send message
+        async function sendMessage() {
+            const input = document.getElementById('userInput');
+            const sendBtn = document.getElementById('sendBtn');
+            const message = input.value.trim();
+
+            if (!message) return;
+
+            // Add user message to chat
+            addMessage(message, true);
+            input.value = '';
+            sendBtn.disabled = true;
+            showTyping(true);
+
+            try {
+                const response = await fetch(`${API_URL}/api/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        sessionId: SESSION_ID,
+                        message: message
+                    })
+                });
+
+                const data = await response.json();
+                
+                // Simulate typing delay for better UX
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                showTyping(false);
+                
+                if (data.success) {
+                    addMessage(data.message);
+                    
+                    // If reservation is complete, celebrate!
+                    if (data.isComplete && data.reservationCode) {
+                        setTimeout(() => {
+                            addMessage('Terima kasih telah menggunakan layanan kami! Sampai jumpa! 👋', false);
+                        }, 1000);
+                    }
+                } else {
+                    addMessage('❌ Maaf, terjadi kesalahan: ' + (data.message || 'Silakan coba lagi.'));
+                }
+            } catch (error) {
+                showTyping(false);
+                console.error('Error:', error);
+                
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.innerHTML = `
+                    <strong>⚠️ Tidak dapat terhubung ke server</strong><br>
+                    Pastikan backend sudah running di ${API_URL}
+                `;
+                
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message bot';
+                messageDiv.innerHTML = `
+                    <div class="message-avatar">🤖</div>
+                    <div>${errorDiv.outerHTML}</div>
+                `;
+                
+                const chatBox = document.getElementById('chatBox');
+                const typingIndicator = document.getElementById('typing').parentElement;
+                chatBox.insertBefore(messageDiv, typingIndicator);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+
+            sendBtn.disabled = false;
+            input.focus();
+        }
+
+        // Handle Enter key press
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        // Auto focus input on load
+        window.onload = () => {
+            document.getElementById('userInput').focus();
+            
+            // Test connection to backend
+            fetch(`${API_URL}/`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('✅ Connected to backend:', data);
+                })
+                .catch(error => {
+                    console.error('❌ Cannot connect to backend:', error);
+                    console.log('Make sure backend is running at:', API_URL);
+                });
+        };
+
+        // Prevent form submission
+        document.getElementById('userInput').addEventListener('submit', (e) => {
+            e.preventDefault();
+        });
+    </script>
+</body>
+</html>

@@ -25,6 +25,8 @@ const groq = new Groq({
 // Middleware
 app.use(cors()); // Allow cross-origin requests
 app.use(express.json()); // Parse JSON body
+// Serve static files from public folder
+app.use(express.static('public'));
 
 // System Prompt untuk AI Agent
 const SYSTEM_PROMPT = `Anda adalah asisten virtual untuk Restoran WAJIB yang bertugas membantu pelanggan membuat reservasi meja. Anda harus bersikap ramah, sopan, dan profesional dalam Bahasa Indonesia.
